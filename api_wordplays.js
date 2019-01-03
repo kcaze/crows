@@ -11,9 +11,9 @@ solvers.push((function() {
         do {
           m = ROW_REGEX.exec(req.responseText);
           if (m) {
-            const confidence = m[1].length / "<div></div>".length / 5.0;
+            const score = m[1].length / "<div></div>".length / 5.0;
             const word = m[3];
-            words.push([word, confidence]);
+            words.push({word, score});
           }
         } while (m != null);
         resolve(words);

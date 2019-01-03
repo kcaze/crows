@@ -1,88 +1,96 @@
 let solvers = [];
-let results = [];
-let resultsClue = '';
-let resultsStale = false;
+let query = null;
+let state = {
+  // Format of results is an object {word, score} where score is between 0 and 1
+  results: [],
+  clue: '',
+  constraints: '',
+};
 
 const inputForm = document.getElementById('inputForm');
 const clueInput = document.getElementById('clue');
 const constraintsInput = document.getElementById('constraints');
-const outDiv = document.getElementById('out');
+const output = document.getElementById('out');
 
 inputForm.addEventListener('submit', event => {
-  const clue = clueInput.value;
-  resultsClue = clueInput.value;
-  if (resultsStale) {
-    resultsStale = false;
-    outDiv.innerHTML = '';
-    outDiv.classList.remove('stale');
-    Promise.all(solvers.map(solve => solve(clue))).then(resArray => {
-      let res = [];
-      for (const arr of resArray) {
-        res = res.concat(arr);
-      } 
-      results = res;
-      console.log(results);
-      updateOutDiv();
-    });
-  } else {
-    updateOutDiv();
-  }
+  state.clue = clueInput.value;
+  state.constraints = constraintsInput.value;
+  state.results = [];
+
+  if (query == null) {
+    clearOutput();
+    query = Promise.all(solvers.map(solve => solve(state.clue)))
+      .then(resultsArray => [].concat(...resultsArray));
+  } 
+  query.then(results => {
+    state.results = results;
+    updateOutput();
+  });
 
   event.preventDefault();
   return false;
-})
+});
 
-clueInput.addEventListener('keydown', event => {
-  if (clueInput.value != resultsClue) {
-    outDiv.classList.add('stale');
-    resultsStale = true;
+clueInput.addEventListener('keydown', _ => {
+  if (clueInput.value == state.clue) {
+    return;
   }
-})
+  output.classList.add('stale');
+  query = null;
+});
 
-function updateOutDiv() {
-  const res = dedup(filter(sort(results)));
-  console.log(res);
-  if (typeof res === 'string') {
-    outDiv.innerHTML = formatResults(resultsClue, [], res);
-  } else {
-    if (res.length === 0) {
-      outDiv.innerHTML = formatResults(resultsClue, [], 'No results found');
-    } else {
-      outDiv.innerHTML = formatResults(resultsClue, sort(res), '');
-    }
-  }
+function clearOutput() {
+  output.innerHTML = '';
+  output.classList.remove('stale');
 }
 
-function dedup(res) {
-  return res.filter((item, pos) => {
-    const r = res.find(x => {
-      return x[0] == item[0];
-    });
-    return res.indexOf(r) === pos;
-  });
-}
-
-function filter(res) {
-  const constraints = constraintsInput.value;
-  if (constraints === '') {
-    return res;
-  }
-  let reg;
+function updateOutput() {
+  let processedResults;
   try {
-    reg = new RegExp(constraints, 'i');
-  } catch (e) {
-    return e.message;
+    processedResults = sort(filter(dedupe(state.results), state.constraints));
+  } catch (error) {
+    output.innerHTML = formatResults(state.clue, [], error);
+    return;
   }
+
+  output.innerHTML = formatResults(state.clue, processedResults, processedResults.length > 0 ? '' : 'No results found');
+}
+
+// Dedupe results whose 'word' field is the same.
+// This retains the result whose score is highest.
+function dedupe(results) {
+  const scores = {};
+  for (const r of results) {
+    scores[r.word] = Math.max(r.score, scores[r.word] || 0);
+  }
+  return Object.keys(scores).map(word => ({ word, score: scores[word] }));
+}
+
+// Filters results to those that match the passed in (regex) constraints.
+function filter(results, constraints) {
+  console.log(constraints);
+  if (!constraints) {
+    return results;
+  }
+  const reg = new RegExp(constraints, 'i');
   return results.filter(r => {
-    const m = reg.exec(r[0]);
-    return m != null && m[0].length === r[0].length;
+    const match = reg.exec(r.word);
+    return match != null && match[0].length === r.word.length;
   });
 }
 
+// Sort results in descending order by score.
 function sort(res) {
-  return res.sort((r1, r2) => Math.sign(r2[1] - r1[1]));
+  return res.sort((r1, r2) => Math.sign(r2.score - r1.score));
 }
 
-function formatResults(clue, res, message) {
-  return `<table><tr><td>Results for '${clue}':</td></tr>${res.map(item => `<tr><td>${item[0]}</td><td>${Math.round(item[1]*100)}%</td></tr>`).join('')}<tr><td>${message}</td></tr></table>`;
+function formatRow(...cells) {
+  return `<tr>${cells.map(c => `<td>${c}</td>`).join('')}</tr>`;
+}
+
+function formatResults(clue, results, message) {
+  const header = formatRow(`Results for '${clue}'`);
+  const resultRows = results.map(r => formatRow(r.word, Math.round(r.score*100) + '%'));
+  const footer = message ? formatRow(message) : '';
+  return `<table>${header}${resultRows.join('')}${footer}</table>`;
 }

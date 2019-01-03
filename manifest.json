@@ -6,7 +6,7 @@
   "permissions": ["activeTab"],
   "background": {
     "scripts": ["background.js"],
-    "persistent": false
+    "persistent": true
   },
   "permissions": [
     "https://www.wordplays.com/",
@@ -23,7 +23,7 @@
     }
   },
   "browser_action": {
-    "default_title": "Make this page red",
+    "default_title": "Solve crossword clues.",
     "default_popup": "popup.html"
   }
 }
