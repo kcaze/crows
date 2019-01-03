@@ -8,33 +8,14 @@ solvers.push((function() {
       req.addEventListener("load", ret => {
         const words = [];
         let m;
-        let numAnswers = 0;
-        let numNonAnswers = 0;
-        // Algorithm here is to put everything that's an answer in the 50% to 100% range, linearly decreasing
-        // and put everything that's not an answer in the 0% to 50% range, linearly decreasing.
         do {
           m = REGEX.exec(req.responseText);
           if (m) {
-            const score = m.length > 2 && m[2].indexOf("ANSWER") != -1 ? 1.0 : 0.0;
-            if (score != 0.0) {
-              numAnswers++;
-            }
+            const score = 0.0;
             const word = m[1];
-            words.push({word, score});
+            words.push({word, score: 0.0});
           }
         } while (m != null);
-        numNonAnswers = words.length - numAnswers;
-        const answerDecrement = 0.5 / numAnswers;
-        const nonAnswerDecrement = 0.5 / numNonAnswers;
-        let answerIdx = 0;
-        let nonAnswerIdx = 0;
-        words.forEach(word => {
-          if (word.score == 1.0) {
-            word.score = 1.0 - answerDecrement*(answerIdx++);
-          } else {
-            word.score = 0.5 - nonAnswerDecrement*(nonAnswerIdx++);
-          }
-        });
         resolve(words);
       });
       req.open("POST", BASE_URL, true);

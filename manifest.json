@@ -3,25 +3,30 @@
   "version": "1.0",
   "description": "Crossword Solver",
   "manifest_version": 2,
-  "permissions": ["activeTab"],
   "background": {
     "scripts": ["background.js"],
     "persistent": true
   },
   "permissions": [
+    "activeTab",
     "https://www.wordplays.com/",
     "http://www.the-crossword-solver.com/"
   ],
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
-        "windows": "Ctrl+Shift+Y",
-        "mac": "Command+Shift+Y",
-        "chromeos": "Ctrl+Shift+U",
-        "linux": "Ctrl+Shift+J"
+        "windows": "Alt+C",
+        "mac": "Alt+C"
       }
     }
   },
+   "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentScript.js"]
+    }
+  ],
+
   "browser_action": {
     "default_title": "Solve crossword clues.",
     "default_popup": "popup.html"
