@@ -1,10 +1,20 @@
+body {
+    width: 240px;
+}
+
+input {
+    display: block;
+    width: 240px;
+}
+
 .stale table {
     color: gray;
 }
 
 .loading {
     display: inline-block;
-    width: 16px;
+    margin: auto;
+    width: 240px;
     height: 16px;
 }
 .loading:after {
@@ -12,7 +22,7 @@
     display: block;
     width: 14px;
     height: 14px;
-    margin: 1px;
+    margin: auto 1px;
     border-radius: 50%;
     border: 2px solid #000;
     border-color: #000 transparent #000 transparent;
