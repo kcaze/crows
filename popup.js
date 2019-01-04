@@ -35,7 +35,7 @@ function onSubmit(event) {
   if (query == null) {
     clearOutput();
     output.classList.add('loading');
-    query = Promise.all(solvers.map(solve => solve(state.clue)))
+    query = Promise.all(solvers.map(solver => solver.solve(state.clue)))
       .then(resultsArray => [].concat(...resultsArray));
   } 
   query.then(results => {
@@ -93,8 +93,8 @@ function filter(results, constraints) {
     return results;
   }
   // Treat regex's that lead with numbers as lengths
-  if (!isNaN(parseInt(constraints[0]))) {
-    constraints = '.'.repeat(parseInt(constraints[0]));
+  if (!isNaN(parseInt(constraints))) {
+    constraints = '.'.repeat(parseInt(constraints));
   }
   const reg = new RegExp(constraints, 'i');
   return results.filter(r => {
