@@ -103,12 +103,16 @@ function filter(results, constraints) {
   });
 }
 
-// Sort results in descending order by score, then alphabetical.
+// All likely answers go at the top, then sort by word length, and then alpha.
 function sort(res) {
   return res.sort((r1, r2) => {
     const scoreSort = Math.sign(r2.score - r1.score);
     if (scoreSort != 0) {
       return scoreSort;
+    }
+    const lenSort = Math.sign(r1.word.length - r2.word.length);
+    if (lenSort != 0) {
+      return lenSort;
     }
     const w1 = r1.word.toUpperCase();
     const w2 = r2.word.toUpperCase();
@@ -128,7 +132,7 @@ function formatRow(...cells) {
 
 function formatResults(clue, results, message) {
   const header = formatRow(`Results for '${clue}'`);
-  const resultRows = results.map(r => formatRow(r.word, Math.round(r.score*100) + '%'));
+  const resultRows = results.map(r => formatRow(r.score === 1.0 ? `<span class="likely">${r.word}</span>` : `<span class="unlikely">${r.word}</span>`));
   const footer = message ? formatRow(message) : '';
   return `<table>${header}${resultRows.join('')}${footer}</table>`;
 }

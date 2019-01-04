@@ -7,7 +7,7 @@ solvers.push((function() {
     do {
       m = ROW_REGEX.exec(response);
       if (m) {
-        const score = m[1].length / "<div></div>".length / 5.0;
+        const score = m[1].length / "<div></div>".length >= 4.0 ? 1.0 : 0.0;
         const word = m[3];
         words.push({word, score});
       }
@@ -16,6 +16,7 @@ solvers.push((function() {
   }
   return {
     name: "wordplays",
+    extract,
     solve(clue) {
       return new Promise(resolve => {
         const url = `${BASE_URL}/${encodeURIComponent(clue.replace(/\s/g, '-'))}`;

@@ -11,6 +11,14 @@ td {
     font-family: monospace;
 }
 
+.likely {
+    font-weight: bolder;
+}
+
+.unlikely {
+    font-weight: lighter;
+}
+
 .stale table {
     color: gray;
 }
