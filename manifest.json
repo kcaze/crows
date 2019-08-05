@@ -1,6 +1,6 @@
 {
   "name": "Crows",
-  "version": "1.1",
+  "version": "1.2",
   "description": "Crossword Solver",
   "manifest_version": 2,
   "background": {
